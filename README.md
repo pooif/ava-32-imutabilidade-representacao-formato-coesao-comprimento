@@ -1,57 +1,141 @@
-# Template para projetos Java usando o Visual Studio Code
+# 3.2 // Imutabilidade, Representação, Formato e Coesão // Comprimento
 
-Um _template_ é um projeto base, para não iniciar do zero e ter pelo menos uma estrutura mínima onde se apoiar.
+Use este link do GitHub Classroom para ter sua cópia alterável deste repositório: <>
 
-Antes de começar a desenvolver com este _template_ é necessário ter instalado o Java Software Development Kit (JDK), o editor Visual Studio Code (VSCode) e o utilitário de controle de versão de código _Git_.
+Implementar respeitando os fundamentos de Orientação a Objetos.
+
+**Tópicos desta atividade:** imutabilidade, formatos de representação, formatos de entrada, coesão
+
+---
+
+Implementar o objeto `Comprimento`. Instâncias de `Comprimento` devem representar uma extensão ([distância entre dois pontos](https://pt.wikipedia.org/wiki/Comprimento)) a partir de várias unidades, sendo considerada inicialmente a unidade básica metro, conforme SI. É usada uma precisão de milimetros, portanto este é o atributo que determina o comprimento. Considere os Casos de Teste:
+
+```java
+// construtores:
+Comprimento zero = new Comprimento();
+System.out.println(zero.milimetros == 0);
+
+// milimetros é constante, não deve compilar:
+zero.milimetros = 10; // comente essa linha após fazê-la falhar
+
+// construtor double metro:
+Comprimento umMetro = new Comprimento(1.0);
+System.out.println(umMetro.milimetros == 1000);
+
+Comprimento umMetroMeio = new Comprimento(1.5);
+System.out.println(umMetroMeio.milimetros == 1500);
+
+Comprimento cemMetros = new Comprimento(100.0);
+System.out.println(cemMetros.milimetros == 100000);
+
+// construtor inteiro milimetros:
+Comprimento umCentimetro = new Comprimento(100);
+System.out.println(umCentimetro.milimetros == 100);
+
+// comprimentos inválidos, negativo!
+// Faça lançar exceção e abrace-as com try/catch
+Comprimento invalido1 = new Comprimento(-1.0);
+Comprimento invalido2 = new Comprimento(-10);
+
+// métodos estáticos fábrica:
+Comprimento umaPolegada = Comprimento.fromPolegadas(1.0);
+System.out.println(umaPolegada.milimetros == 25);
+
+Comprimento cincoPolegadas = Comprimento.fromPolegadas(5.0);
+System.out.println(cincoPolegadas.milimetros == 127);
+
+Comprimento dozeMilimetros = Comprimento.fromString("12mm");
+System.out.println(dozeMilimetros.milimetros == 12);
+
+Comprimento dozeCentimetros = Comprimento.fromString("12cm");
+System.out.println(dozeCentimetros.milimetros == 120);
+
+Comprimento dozePolegadas = Comprimento.fromString("12\"");
+// seria 304.8mm, mas os mm devem ser truncados, não arredondados.
+System.out.println(dozePolegadas.milimetros == 304);
+
+Comprimento dozeMetros = Comprimento.fromString("12m");
+System.out.println(dozeMetros.milimetros == 12000);
+
+// qualquer string fora deste padrão [0-9](mm|cm|m|") deve ser rejeitada
+// faça lançar exceção e abrace-as com try/catch
+Comprimento.fromString("12");
+Comprimento.fromString("12e");
+Comprimento.fromString("12 m");
+Comprimento.fromString("12M");
+
+// consultas: (pode ser ajustado para o arredondamento, exceto de mm que é truncado)
+System.out.println(cincoPolegadas.getCentimetros() == 12.7);
+System.out.println(cincoPolegadas.getMetros() == 0.127);
+System.out.println(cemMetros.getPolegadas() == 3937.0);
+System.out.println(dozeMetros.getMilimetros() == 12000);
+
+// toString
+System.out.println(umMetro.toString()); // 1000mm
+System.out.println(umMetro.toString().equals("1000mm"));
+System.out.println(umMetroMeio.toString()); // 1500mm
+System.out.println(umMetroMeio.toString().equals("1500mm"));
+System.out.println(cemMetros.toString()); // 100000mm
+System.out.println(cemMetros.toString().equals("100000mm"));
+
+// Unidade é um enum declarado dentro da classe Comprimento com as seguintes constantes:
+System.out.println(umMetro.toString(Comprimento.Unidade.POLEGADA)); // 39.37"
+System.out.println(umMetro.toString(Comprimento.Unidade.POLEGADA).equals("39.37\""));
+System.out.println(umMetroMeio.toString(Comprimento.Unidade.CENTIMETRO)); // 150cm
+System.out.println(umMetroMeio.toString(Comprimento.Unidade.CENTIMETRO).equals("150cm"));
+System.out.println(cemMetros.toString(Comprimento.Unidade.METRO)); // 100m
+System.out.println(cemMetros.toString(Comprimento.Unidade.METRO).equals("100m"));
+System.out.println(cemMetros.toString(Comprimento.Unidade.KILOMETRO)); // 0.1km
+System.out.println(cemMetros.toString(Comprimento.Unidade.KILOMETRO).equals("0.1km"));
+
+// operações: (Comprimento é imutável)
+Comprimento doisMetrosMeio = umMetro.mais(umMetroMeio);
+System.out.println(umMetro.milimetros == 1000);
+System.out.println(umMetroMeio.milimetros == 1500);
+System.out.println(doisMetrosMeio.milimetros == 2500);
+
+Comprimento dezMetros = doisMetrosMeio.mais(7.5); // 2.5m + 7.5m
+System.out.println(dezMetros.milimetros == 10000);
+
+Comprimento dezMetrosComOitentaMilimetros = dezMetros.mais(80); // + 80mm
+System.out.println(dezMetrosComOitentaMilimetros.milimetros == 10080);
+
+Comprimento vinteMetros = dezMetros.dobro();
+System.out.println(vinteMetros.milimetros == 20000);
+
+Comprimento duzentosMetros = vinteMetros.vezes(10);
+System.out.println(duzentosMetros.milimetros == 200000);
+System.out.println(duzentosMetros.toString(Comprimento.Unidade.KILOMETRO)); // 0.2km
+System.out.println(duzentosMetros.toString(Comprimento.Unidade.KILOMETRO).equals("0.2km"));
+
+// 4 segmentos de 50m
+Comprimento[] segmentos = duzentosMetros.segmentos(4);
+System.out.println(segmentos[0].milimetros == 50000);
+System.out.println(segmentos[1].milimetros == 50000);
+System.out.println(segmentos[2].milimetros == 50000);
+System.out.println(segmentos[3].milimetros == 50000);
+
+Comprimento[] cincoPolegadasEmTresSegmentos = cincoPolegadas.segmentos(3);
+System.out.println(cincoPolegadasEmTresSegmentos[0].milimetros == 42);
+System.out.println(cincoPolegadasEmTresSegmentos[1].milimetros == 42);
+// o acumulo do resto fica no último segmento
+System.out.println(cincoPolegadasEmTresSegmentos[2].milimetros == 43);
+
+// concatenar
+Comprimento conc1 = Comprimento.fromSegmentos(segmentos);
+System.out.println(conc1.milimetros == 200000);
+System.out.println(conc1.equals(duzentosMetros));
+
+// usar o varargs (Google Java+varargs)
+Comprimento conc2 = Comprimento.fromSegmentos(umaPolegada, cincoPolegadas, dozePolegadas);
+System.out.println(conc2.milimetros == 457);
+System.out.println(conc2.getPolegadas() == 18.0);
+
+// IMPLEMENTE E TESTE a subtração de comprimentos,
+// considerando que não há comprimento negativo.
+```
 
 
 
-## Instalação e Configuração do JDK
-
-É necessário instalar o JDK a partir da versão 8, porém é recomendada versão 11-LTS (Long Term Support - suporte de longo prazo) ou até mesmo a 17-LTS.
-
-Para o Sistema Operacional (SO) Windows, ele pode ser obtido aqui <https://adoptium.net/?variant=openjdk11&jvmVariant=hotspot>. Siga as instruções de instalação e não esqueça de selecionar os opcionais durante o processo, especialmente a parte ⚠️ _"add Java to PATH"_.
-
-Para Sistemas Operacionais Linux/Debian, como Ubuntu, Pop OS, Mint, Elementary, etc, execute no terminal o comando `sudo apt install openjdk-11-jdk`, que a mágica vai acontecer.
-
-Para testar a instalação, seja no Windows ou Linux, abra o _Prompt_ de Comando (cmd) ou o Terminal e execute o compilador Java com `javac -version`. A saída deve ser algo com `javac 11.0.9.1`, ou outra versão.
-
-
-
-## Instalação e Configuração do Visual Studio Code (VSCode)
-
-O VSCode pode ser obtido aqui: <https://code.visualstudio.com/download>. A instalação é semelhante nos Sistemas Operacionais Windows e Linux.
-
-No Windows, abra o instalador e não esqueça de selecionar todos os opcionais, como _adicionar code ao path_ e _adicionar "abrir com code" ao menu_, por exemplo.
-
-No Linux, abra o arquivo `.deb` baixado no gerenciador de pacotes e instale normalmente conforme instruções de seu sistema operacional.
-
-Este _template_ possui uma pasta [.vscode](.vscode) com as extensões necessárias em [extensions.json](.vscode/extensions.json) e as configurações recomendadas em [settings.json](.vscode/settings.json) para um **ambiente de ensino** (configuração didática). Fique a vontade para alterá-los como achar melhor.
-
-A única extensão obrigatória é a _"vscjava.vscode-java-pack"_.
-
-A extensão _"EditorConfig"_ é bastante recomendada. Ela funciona junto com o arquivo [.editorconfig](.editorconfig) presente neste _template_ para padronizar a formatação dos códigos-fonte.
-
-Finalmente, se preferes o editor em Português, instale a extensão _Portuguese (Brazil) Language Pack for Visual Studio Code_.
-
-
-
-## Instalação e Configuração do Git
-
-O Git para Windows pode ser obtido neste link: <https://git-scm.com/download/win>. A instalação é simples e intuitiva. Como sempre, não esqueça dos opcionais, principalmente a opção _adicionar o git ao path_!
-
-Para Linux, o comando `sudo apt install git` no terminal faz tudo.
-
-Para verificar a instalação abra o _prompt_ ou um terminal e execute `git --version`. Se não acusou _"comando não encontrado"_ é porque está tudo funcionando perfeitamente.
-
-
-
-## Códigos-fonte
-
-Considere adicionar os arquivos de código-fonte `.java` no diretório [src](./src/), como o exemplo [src/App.java](./src/App.java).
-
-
-
-## Licenciamento
-
-Este _template_ é _open source_ licenciado sob a GPL, assim como todos os projetos derivados dele. Mais detalhes em [LICENÇA.md](LICENÇA.md).
+---
+Obs.: os casos de teste não podem ser alterados, mas outros podem ser adicionados. Fique a vontade para adicionar códigos que imprimem ou separam os testes, por exemplo.
